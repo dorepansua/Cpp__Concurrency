@@ -13,30 +13,39 @@ void doTheWork()
     std::cout<<"Process shared data  ..."<<std::endl;
 }
 
+void setData()
+{
+   {
+        std::unique_lock<std::mutex> lock(mutex);
+        dataReady = true;
+   }
+
+   std::cout<<"Data is ready..."<<std::endl;
+   cv.notify_one();
+
+}
+
+
 void waitingData()
 {
-    std::cout<<"Waiting data ..."<<std::endl;
-
+    std::cout<<"Waiting data "<<std::endl;
     std::unique_lock<std::mutex> lock(mutex);
+
+
     cv.wait(lock, [](){
         return dataReady;
     });
 
+    //another way to code a wait function.
+    // while (![](){
+    //     return dataReady;
+    // }) {
+    //     cv.wait(lock);
+    // }
+
     doTheWork();
-
-    std::cout<<"Work done! "<<std::endl;
-
-}
-
-void setData()
-{
-    {
-        std::lock_guard<std::mutex> lock(mutex);
-        dataReady = true;
-    }
-    std::cout<<" Data is ready"<<std::endl;
-
-    cv.notify_one();
+    
+    std::cout<<"Work done"<<std::endl;
 }
 
 int main()
