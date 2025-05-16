@@ -12,4 +12,5 @@ add_executable(Singleton_meyers Singleton_meyers/main.cpp)
 add_executable(Singleton_call_one Singleton_call_one/main.cpp)
 add_executable(Thread_Local_Data Thread_Local_Data/main.cpp)
 add_executable(first_use_cv Condition_Variables/First_usage.cpp)
+add_executable(ping_pong Condition_Variables/ping_pong.cpp)
 
