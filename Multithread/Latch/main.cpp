@@ -2,46 +2,61 @@
 
 #include <condition_variable>
 #include <iostream>
+#include <latch>
+#include <string>
 #include <thread>
 using namespace std;
 
-std::condition_variable cv;
-std::mutex mut;
-int num = 100;
+std::latch workDone(6);
+std::latch goHome(1);
+std::mutex count_mutex;
 
-void Ping() {
-  while (num > 0) {
-    std::unique_lock<std::mutex> lock(mut);
-
-    cv.wait(lock, []() { return num % 2 == 0; });
-
-    std::cout << "Ping\n";
-
-    num--;
-
-    cv.notify_one();
-  }
+void synchOut(const std::string &s) {
+  std::lock_guard<std::mutex> lock(count_mutex);
+  std::cout << s << std::endl;
 }
 
-void Pong() {
-  while (num > 0) {
-    std::unique_lock<std::mutex> lock(mut);
+class Worker {
+ public:
+  Worker(const string &_name) : name(_name) {}
 
-    cv.wait(lock, []() { return num % 2 != 0; });
+  void operator()() {
+    synchOut(this->name + "Work done!\n");
+    workDone.count_down();
+    goHome.wait();
 
-    std::cout << "Pong\n";
-
-    num--;
-
-    cv.notify_one();
+    synchOut(name + ": " + "Good bye!\n");
   }
-}
+
+ private:
+  std::string name;
+};
 
 int main() {
-  printf("Hello World");
+  std::cout << "\nBOSS: START WORKING! " << '\n';
+  Worker herb(" Herb");
+  std::jthread t1(herb);
 
-  std::jthread t1(Ping);
-  std::jthread t2(Pong);
+  Worker scott(" Scott");
+  std::jthread t2(scott);
 
-  return 0;
+  Worker bjarne(" Bjarne");
+  std::jthread t3(bjarne);
+
+  Worker andrei(" Andrei");
+  std::jthread t4(andrei);
+
+  Worker andrew(" Andrew");
+  std::jthread t5(andrew);
+
+  Worker david(" David");
+  std::jthread t6(david);
+
+  workDone.wait();
+
+  goHome.count_down();
+
+  std::cout << "BOSS: GO HOME!" << '\n';
+  system("pause");
+  return 1;
 }
