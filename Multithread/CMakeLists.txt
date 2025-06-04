@@ -15,4 +15,6 @@ add_executable(first_use_cv Condition_Variables/First_usage.cpp)
 add_executable(ping_pong Condition_Variables/ping_pong.cpp)
 add_executable(latch Latch/main.cpp)
 add_executable(latch2 Latch/main2.cpp)
+add_executable(barirer Barirer/main.cpp)
+
 
